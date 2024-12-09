@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import MainPage from "./Components/MainPage";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import ModifyPage from "./Components/ModifyPage";
 
 const App = () => {
   const [clientData, setClientData] = useState([]);
@@ -28,9 +30,33 @@ const App = () => {
   console.log("client data", clientData);
 
   return (
+    // <>
+    //   <Routes>
+    //     <Route
+    //       path="/dashboardPortal"
+    //       element={<MainPage clientData={clientData} />}
+    //     />
+    //     <Route path="/" element={<ProtectedRoute />}>
+    //       <Route path="modify" element={<ModifyPage />} />
+    //     </Route>
+    //   </Routes>
+    // </>
+
     <>
       <Routes>
-        <Route path="/" element={<MainPage clientData={clientData} />} />
+        {/* Redirect root path to dashboardPortal */}
+        <Route path="/" element={<Navigate to="/dashboardPortal" replace />} />
+
+        {/* Main page route */}
+        <Route
+          path="/dashboardPortal"
+          element={<MainPage clientData={clientData} />}
+        />
+
+        {/* Protected routes */}
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="modify" element={<ModifyPage />} />
+        </Route>
       </Routes>
     </>
   );
