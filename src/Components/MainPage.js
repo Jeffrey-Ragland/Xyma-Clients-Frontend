@@ -23,7 +23,8 @@ const MainPage = ({ clientData }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:4000/sensor/verifyXymaClientsPassword",
+        // "http://localhost:4000/sensor/verifyXymaClientsPassword",
+        "http://43.204.133.45:4000/sensor/verifyXymaClientsPassword",
         { username, password }
       );
       if (response.status === 200) {
