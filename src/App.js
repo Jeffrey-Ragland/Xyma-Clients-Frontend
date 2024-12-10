@@ -7,9 +7,20 @@ import ModifyPage from "./Components/ModifyPage";
 
 const App = () => {
   const [clientData, setClientData] = useState([]);
+  const [clientCredentials, setClientCredentials] = useState([]);
 
   useEffect(() => {
     getXymaClients();
+  }, []);
+
+  useEffect(() => {
+    getXymaCredentials();
+
+    const interval = setInterval(getXymaCredentials, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   const getXymaClients = async () => {
@@ -27,7 +38,21 @@ const App = () => {
     }
   };
 
-  console.log("client data", clientData);
+  const getXymaCredentials = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/sensor/getXymaCredentials"
+      );
+      if (response.status === 200) {
+        setClientCredentials(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error getting credentials", error);
+    }
+  };
+
+  // console.log("client data", clientData);
+  // console.log("credentials", clientCredentials);
 
   return (
     // <>
@@ -55,7 +80,15 @@ const App = () => {
 
         {/* Protected routes */}
         <Route path="/" element={<ProtectedRoute />}>
-          <Route path="modify" element={<ModifyPage />} />
+          <Route
+            path="modify"
+            element={
+              <ModifyPage
+                clientData={clientData}
+                clientCredentials={clientCredentials}
+              />
+            }
+          />
         </Route>
       </Routes>
     </>
