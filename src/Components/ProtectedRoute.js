@@ -16,7 +16,8 @@ const ProtectedRoute = () => {
 
       try {
         const response = await axios.post(
-          "http://localhost:4000/sensor/xymaClientsValidateToken",
+          //   "http://localhost:4000/sensor/xymaClientsValidateToken",
+          "http://43.204.133.45:4000/sensor/xymaClientsValidateToken",
           {},
           {
             headers: {

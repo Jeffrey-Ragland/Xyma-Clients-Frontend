@@ -10,8 +10,10 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 
 const MainPage = ({ clientData }) => {
   const [passwordPopup, setPasswordPopup] = useState(false);
+  const [otpPopup, setOtpPopup] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
 
   const navigate = useNavigate();
 
@@ -23,19 +25,48 @@ const MainPage = ({ clientData }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        // "http://localhost:4000/sensor/verifyXymaClientsPassword",
-        "http://43.204.133.45:4000/sensor/verifyXymaClientsPassword",
+        "http://localhost:4000/sensor/verifyXymaClientsPassword",
+        // "http://43.204.133.45:4000/sensor/verifyXymaClientsPassword",
         { username, password }
       );
       if (response.status === 200) {
         if (response.data.success === true) {
-          localStorage.setItem("Token", response.data.token);
-          navigate(response.data.redirectUrl);
+          setPasswordPopup(false);
+          setOtpPopup(true);
+          setPassword("");
+          setUsername("");
         } else if (response.data.success === false) {
           toast.error("Invalid Credentials");
+          setPassword("");
+          setUsername("");
         }
       }
     } catch (error) {
+      toast.error("Server Error!");
+      console.error("Error verifying password", error);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/sensor/verifyXymaClientsOtp",
+        // "http://43.204.133.45:4000/sensor/verifyXymaClientsOtp",
+        { otp }
+      );
+      if (response.status === 200 && response.data.success) {
+        localStorage.setItem("Token", response.data.token);
+        navigate(response.data.redirectUrl);
+        // console.log("otp is valid");
+        setOtp("");
+      } else if (!response.data.success) {
+        // console.log("error:", response.data.message);
+        toast.error(response.data.message);
+        setOtp("");
+      }
+    } catch (error) {
+      toast.error("Server Error!");
       console.error("Error verifying password", error);
     }
   };
@@ -153,6 +184,57 @@ const MainPage = ({ clientData }) => {
                 autoComplete="off"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="text-white py-1 px-4 rounded-lg hover:scale-110 duration-200 text-sm 2xl:text-base font-semibold bg-gradient-to-r from-[#FE6F17] to-[#FE9D1C]"
+              >
+                Generate OTP
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* otp popup */}
+      {otpPopup && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+          <form
+            className="relative bg-white rounded-xl px-4 md:px-8 py-3 md:py-6 flex flex-col gap-4 md:gap-6 text-sm md:text-base"
+            onSubmit={handleVerifyOTP}
+          >
+            <div className="">
+              <div className="text-center font-semibold text-lg md:text-xl">
+                Verify OTP
+              </div>
+              <button
+                className="absolute right-3 top-3 rounded-full p-1 text-xl text-white bg-gradient-to-r from-[#FE6F17] to-[#FE9D1C]"
+                onClick={() => {
+                  setPasswordPopup(false);
+                  setOtpPopup(false);
+                  setOtp("");
+                }}
+              >
+                <RiCloseFill />
+              </button>
+            </div>
+
+            <div className="flex items-center">
+              <label htmlFor="otpInput" className="w-1/2">
+                Enter OTP <span className="text-[#CE2C31]">*</span>
+              </label>
+              <input
+                type="text"
+                className="border border-gray-400 rounded-sm px-1 text-gray-800 focus:outline-none focus:border-gray-600 w-1/2"
+                placeholder="otp..."
+                id="otpInput"
+                required
+                autoComplete="off"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
               />
             </div>
 
