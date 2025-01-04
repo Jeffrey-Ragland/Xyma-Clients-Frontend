@@ -13,7 +13,9 @@ const MainPage = ({ clientData }) => {
   const [otpPopup, setOtpPopup] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
+  const [otpSingle, setOtpSingle] = useState(["", "", "", "", "", ""]);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [verifyButtonClicked, setVerifyButtonClicked] = useState(false);
 
   const navigate = useNavigate();
 
@@ -21,18 +23,32 @@ const MainPage = ({ clientData }) => {
     localStorage.clear();
   }, []);
 
+  useEffect(() => {
+    if (timeLeft > 0 && verifyButtonClicked) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [timeLeft, verifyButtonClicked]);
+
   const handleVerifyPassword = async (e) => {
     e.preventDefault();
     try {
+      const toastId = toast.loading("Loading...", { closeButton: true });
       const response = await axios.post(
-        "http://localhost:4000/sensor/verifyXymaClientsPassword",
-        // "http://43.204.133.45:4000/sensor/verifyXymaClientsPassword",
+        // "http://localhost:4000/sensor/verifyXymaClientsPassword",
+        "http://43.204.133.45:4000/sensor/verifyXymaClientsPassword",
         { username, password }
       );
+      toast.dismiss(toastId);
+
       if (response.status === 200) {
         if (response.data.success === true) {
           setPasswordPopup(false);
           setOtpPopup(true);
+          setVerifyButtonClicked(true);
           setPassword("");
           setUsername("");
         } else if (response.data.success === false) {
@@ -50,20 +66,21 @@ const MainPage = ({ clientData }) => {
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     try {
+      const otp = otpSingle.join("");
       const response = await axios.post(
-        "http://localhost:4000/sensor/verifyXymaClientsOtp",
-        // "http://43.204.133.45:4000/sensor/verifyXymaClientsOtp",
+        // "http://localhost:4000/sensor/verifyXymaClientsOtp",
+        "http://43.204.133.45:4000/sensor/verifyXymaClientsOtp",
         { otp }
       );
       if (response.status === 200 && response.data.success) {
         localStorage.setItem("Token", response.data.token);
         navigate(response.data.redirectUrl);
         // console.log("otp is valid");
-        setOtp("");
+        setOtpSingle(["", "", "", "", "", ""]);
       } else if (!response.data.success) {
         // console.log("error:", response.data.message);
         toast.error(response.data.message);
-        setOtp("");
+        setOtpSingle(["", "", "", "", "", ""]);
       }
     } catch (error) {
       toast.error("Server Error!");
@@ -215,18 +232,20 @@ const MainPage = ({ clientData }) => {
                 onClick={() => {
                   setPasswordPopup(false);
                   setOtpPopup(false);
-                  setOtp("");
+                  setOtpSingle(["", "", "", "", "", ""]);
+                  setVerifyButtonClicked(false);
+                  setTimeLeft(60);
                 }}
               >
                 <RiCloseFill />
               </button>
             </div>
 
-            <div className="flex items-center">
-              <label htmlFor="otpInput" className="w-1/2">
+            <div className="flex gap-4 items-center">
+              <label htmlFor="otpInput-0" className="w-1/2">
                 Enter OTP <span className="text-[#CE2C31]">*</span>
               </label>
-              <input
+              {/* <input
                 type="text"
                 className="border border-gray-400 rounded-sm px-1 text-gray-800 focus:outline-none focus:border-gray-600 w-1/2"
                 placeholder="otp..."
@@ -235,16 +254,78 @@ const MainPage = ({ clientData }) => {
                 autoComplete="off"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-              />
+              /> */}
+              <div className="flex gap-2">
+                {otpSingle.map((digit, index) => (
+                  <input
+                    className="w-8 h-8 text-center border border-gray-400 rounded-md focus:outline-none focus:border-gray-600"
+                    key={index}
+                    id={`otpInput-${index}`}
+                    type="text"
+                    value={digit}
+                    autoComplete="off"
+                    maxLength="1"
+                    required
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/[^0-9]/.test(value)) return;
+
+                      const newOtp = [...otpSingle];
+                      newOtp[index] = value;
+                      setOtpSingle(newOtp);
+
+                      if (value && index < otpSingle.length - 1) {
+                        document
+                          .getElementById(`otpInput-${index + 1}`)
+                          .focus();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace" && otpSingle[index] === "") {
+                        if (index > 0) {
+                          document
+                            .getElementById(`otpInput-${index - 1}`)
+                            .focus();
+                        }
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const pastedText = e.clipboardData.getData("Text");
+                      if (pastedText.length === otpSingle.length) {
+                        const newOtp = pastedText
+                          .split("")
+                          .map((digit) => (digit.match(/[^0-9]/) ? "" : digit));
+                        setOtpSingle(newOtp);
+                      }
+                      e.preventDefault();
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="text-white py-1 px-4 rounded-lg hover:scale-110 duration-200 text-sm 2xl:text-base font-semibold bg-gradient-to-r from-[#FE6F17] to-[#FE9D1C]"
+                className="text-white w-full py-1 px-4 rounded-lg hover:scale-110 duration-200 text-sm 2xl:text-base font-semibold bg-gradient-to-r from-[#FE6F17] to-[#FE9D1C]"
               >
                 Verify
               </button>
+
+              {timeLeft === 0 ? (
+                <div className="text-xs text-red-500 text-center">
+                  OTP Expired!
+                </div>
+              ) : (
+                <div>
+                  <div className="text-xs text-gray-500 text-center">
+                    OTP will expire in{" "}
+                    {timeLeft === 60
+                      ? "01:00"
+                      : `00:${String(timeLeft).padStart(2, "0")}`}
+                  </div>
+                </div>
+              )}
             </div>
           </form>
         </div>

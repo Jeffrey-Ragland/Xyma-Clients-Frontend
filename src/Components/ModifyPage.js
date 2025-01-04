@@ -73,8 +73,8 @@ const ModifyPage = ({ clientData, clientCredentials }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/sensor/addXymaClients",
-        // "http://43.204.133.45:4000/sensor/addXymaClients",
+        // "http://localhost:4000/sensor/addXymaClients",
+        "http://43.204.133.45:4000/sensor/addXymaClients",
         formData,
         {
           headers: {
@@ -106,8 +106,8 @@ const ModifyPage = ({ clientData, clientCredentials }) => {
     // console.log("client id", clientId);
     try {
       const response = await axios.post(
-        "http://localhost:4000/sensor/deleteXymaClients",
-        // "http://43.204.133.45:4000/sensor/deleteXymaClients",
+        // "http://localhost:4000/sensor/deleteXymaClients",
+        "http://43.204.133.45:4000/sensor/deleteXymaClients",
         { clientId }
       );
       if (response.status === 200) {
@@ -126,8 +126,8 @@ const ModifyPage = ({ clientData, clientCredentials }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:4000/sensor/addXymaCredentials",
-        // "http://43.204.133.45:4000/sensor/addXymaCredentials",
+        // "http://localhost:4000/sensor/addXymaCredentials",
+        "http://43.204.133.45:4000/sensor/addXymaCredentials",
         {
           credentialsClientName,
           credentialsProjectName,
@@ -153,8 +153,8 @@ const ModifyPage = ({ clientData, clientCredentials }) => {
   const handleDeleteCredential = async (credentialId) => {
     try {
       const response = await axios.post(
-        "http://localhost:4000/sensor/deleteXymaCredentials",
-        // "http://43.204.133.45:4000/sensor/deleteXymaCredentials",
+        // "http://localhost:4000/sensor/deleteXymaCredentials",
+        "http://43.204.133.45:4000/sensor/deleteXymaCredentials",
         { credentialId }
       );
       if (response.status === 200) {

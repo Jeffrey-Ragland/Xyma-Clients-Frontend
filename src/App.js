@@ -26,8 +26,8 @@ const App = () => {
   const getXymaClients = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/sensor/getXymaClients"
-        // "http://43.204.133.45:4000/sensor/getXymaClients"
+        // "http://localhost:4000/sensor/getXymaClients"
+        "http://43.204.133.45:4000/sensor/getXymaClients"
       );
       if (response.status === 200) {
         // console.log("data from db", response.data.data);
@@ -44,8 +44,8 @@ const App = () => {
     if (tokenAvailable) {
       try {
         const response = await axios.get(
-          "http://localhost:4000/sensor/getXymaCredentials"
-          // "http://43.204.133.45:4000/sensor/getXymaCredentials"
+          // "http://localhost:4000/sensor/getXymaCredentials"
+          "http://43.204.133.45:4000/sensor/getXymaCredentials"
         );
         if (response.status === 200) {
           setClientCredentials(response.data.data);
